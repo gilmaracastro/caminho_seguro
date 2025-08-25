@@ -1,293 +1,345 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Caminho Seguro — Sudeste (Leaflet + OSRM)</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg:#0a0f1c; --panel:#111827; --card:#1f2937; --muted:#9ca3af;
-      --ok:#10b981; --warn:#f59e0b; --danger:#ef4444; --accent:#3b82f6; --border:#374151;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:#f9fafb;font-family:Inter,system-ui,Segoe UI,Roboto,sans-serif}
-    header{position:sticky;top:0;z-index:10;background:var(--panel);border-bottom:1px solid var(--border)}
-    .wrap{max-width:1400px;margin:0 auto;padding:16px}
-    .row{display:grid;grid-template-columns:1fr 1fr 200px auto;gap:12px;align-items:end}
-    label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
-    select,button{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#0b1220;color:#e5e7eb}
-    button{background:linear-gradient(90deg,var(--ok),#059669);font-weight:700;border:none;cursor:pointer}
-    #map{height:calc(100vh - 210px)}
-    .legend{display:flex;gap:16px;align-items:center;margin-top:10px;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:12px}
-    .dot{width:12px;height:12px;border-radius:999px;display:inline-block}
-    .alto{background:var(--danger)} .medio{background:var(--warn)} .baixo{background:var(--ok)}
-    .panel{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px}
-    .score{font-size:24px;font-weight:800}
-    .pill{display:inline-block;background:#0b1220;border:1px solid #334155;border-radius:999px;padding:2px 8px;font-size:12px;color:#cbd5e1}
-    .loading{opacity:.7}
-    /* Leaflet popup dark */
-    .leaflet-popup-content-wrapper{background:var(--card);border:1px solid var(--border);border-radius:12px}
-    .leaflet-popup-content{color:#f9fafb;margin:12px}
-    .leaflet-popup-tip{background:var(--card);border:1px solid var(--border)}
-  </style>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Caminho Seguro — Sudeste (Leaflet + OSRM)</title>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+	<style>
+		:root{
+			--bg:#0a0f1c; --panel:#111827; --card:#1f2937; --muted:#9ca3af;
+			--ok:#10b981; --warn:#f59e0b; --danger:#ef4444; --accent:#3b82f6; --border:#374151;
+		}
+		*{box-sizing:border-box}
+		body{margin:0;background:var(--bg);color:#f9fafb;font-family:Inter,system-ui,Segoe UI,Roboto,sans-serif}
+		header{position:sticky;top:0;z-index:10;background:var(--panel);border-bottom:1px solid var(--border)}
+		.wrap{max-width:1400px;margin:0 auto;padding:16px}
+		.row{display:grid;grid-template-columns:1fr 1fr 200px auto;gap:12px;align-items:end}
+		label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+		select,button{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#0b1220;color:#e5e7eb}
+		button{background:linear-gradient(90deg,var(--ok),#059669);font-weight:700;border:none;cursor:pointer}
+		#map{height:calc(100vh - 210px)}
+		.legend{display:flex;gap:16px;align-items:center;margin-top:10px;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:12px}
+		.dot{width:12px;height:12px;border-radius:999px;display:inline-block}
+		.alto{background:var(--danger)} .medio{background:var(--warn)} .baixo{background:var(--ok)}
+		.panel{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+		.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px}
+		.score{font-size:24px;font-weight:800}
+		.pill{display:inline-block;background:#0b1220;border:1px solid #334155;border-radius:999px;padding:2px 8px;font-size:12px;color:#cbd5e1}
+		.loading{opacity:.7}
+		/* Leaflet popup dark */
+		.leaflet-popup-content-wrapper{background:var(--card);border:1px solid var(--border);border-radius:12px}
+		.leaflet-popup-content{color:#f9fafb;margin:12px}
+		.leaflet-popup-tip{background:var(--card);border:1px solid var(--border)}
+	</style>
 </head>
 <body>
-  <header>
-    <div class="wrap">
-      <div class="row">
-        <div>
-          <label>Origem</label>
-          <select id="origin">
-            <option value="-20.3197,-40.3378">Vitória, ES</option>
-            <option value="-22.9068,-43.1729">Rio de Janeiro, RJ</option>
-            <option value="-19.9167,-43.9345">Belo Horizonte, MG</option>
-            <option value="-23.5505,-46.6333">São Paulo, SP</option>
-          </select>
-        </div>
-        <div>
-          <label>Destino</label>
-          <select id="destination">
-            <option value="-22.9068,-43.1729">Rio de Janeiro, RJ</option>
-            <option value="-20.3197,-40.3378">Vitória, ES</option>
-            <option value="-19.9167,-43.9345">Belo Horizonte, MG</option>
-            <option value="-23.5505,-46.6333">São Paulo, SP</option>
-          </select>
-        </div>
-        <div>
-          <label>Buffer</label>
-          <select id="buffer">
-            <option value="500" selected>500 m</option>
-            <option value="750">750 m</option>
-            <option value="1000">1 km</option>
-          </select>
-        </div>
-        <div>
-          <button id="go">Traçar rota segura</button>
-        </div>
-      </div>
+	<header>
+		<div class="wrap">
+			<div class="row">
+				<div>
+					<label>Origem</label>
+					<select id="origin">
+						<option value="-22.9068,-43.1729">Rio de Janeiro, RJ</option>
+						<option value="-23.5505,-46.6333">São Paulo, SP</option>
+						<option value="-19.9167,-43.9345">Belo Horizonte, MG</option>
+						<option value="-20.3197,-40.3378">Vitória, ES</option>
+						<option value="-22.9099,-47.0626">Campinas, SP</option>
+						<option value="-22.8832,-43.1034">Niterói, RJ</option>
+						<option value="-21.7642,-43.3503">Juiz de Fora, MG</option>
+						<option value="-18.9186,-48.2772">Uberlândia, MG</option>
+						<option value="-23.4543,-46.5337">Guarulhos, SP</option>
+						<option value="-20.1211,-40.3074">Serra, ES</option>
 
-      <div class="panel">
-        <div class="card">
-          <div style="color:var(--muted);font-size:12px">Rotas avaliadas</div>
-          <div id="routesInfo" class="small">—</div>
-        </div>
-        <div class="card">
-          <div style="color:var(--muted);font-size:12px">Pontuação (menor = mais segura)</div>
-          <div id="bestScore" class="score">—</div>
-          <div id="scoreBreakdown" style="color:var(--muted);font-size:12px"></div>
-        </div>
-      </div>
+					</select>
+				</div>
+				<div>
+					<label>Destino</label>
+					<select id="destination">
+						<option value="-20.3197,-40.3378">Vitória, ES</option>
+						<option value="-22.9068,-43.1729">Rio de Janeiro, RJ</option>
+						<option value="-23.5505,-46.6333">São Paulo, SP</option>
+						<option value="-19.9167,-43.9345">Belo Horizonte, MG</option>
+						<option value="-22.9099,-47.0626">Campinas, SP</option>
+						<option value="-22.8832,-43.1034">Niterói, RJ</option>
+						<option value="-21.7642,-43.3503">Juiz de Fora, MG</option>
+						<option value="-18.9186,-48.2772">Uberlândia, MG</option>
+						<option value="-23.4543,-46.5337">Guarulhos, SP</option>
+						<option value="-20.1211,-40.3074">Serra, ES</option>
 
-      <div class="legend">
-        <span class="dot alto"></span> Alto (3)
-        <span class="dot medio"></span> Médio (2)
-        <span class="dot baixo"></span> Baixo (1)
-        <span class="pill">Fonte: acidentes_unificado_pontos.geojson (Sudeste)</span>
-      </div>
-    </div>
-  </header>
+					</select>
+				</div>
+				<div>
+					<label>Buffer</label>
+					<select id="buffer">
+						<option value="500" selected>500 m</option>
+						<option value="750">750 m</option>
+						<option value="1000">1 km</option>
+					</select>
+				</div>
+				<div>
+					<button id="go">Traçar rota segura</button>
+				</div>
+			</div>
 
-  <div id="map"></div>
+			<div class="panel">
+				<div class="card">
+					<div style="color:var(--muted);font-size:12px">Rotas avaliadas</div>
+					<div id="routesInfo" class="small">—</div>
+				</div>
+				<div class="card">
+					<div style="color:var(--muted);font-size:12px">Pontuação (menor = mais segura)</div>
+					<div id="bestScore" class="score">—</div>
+					<div id="scoreBreakdown" style="color:var(--muted);font-size:12px"></div>
+				</div>
+			</div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
-  <script>
-  // ================== CONFIG ==================
-  const ACCIDENTS_GEOJSON_URL = "acidentes_unificado_pontos.geojson"; // Sudeste unificado
-  const OSRM_SELFHOST_URL = "http://127.0.0.1:5000/route/v1"; // seu OSRM local
-  // Pesos para pontuação de risco (penaliza 3 e 2)
-  const WEIGHT_3 = 5, WEIGHT_2 = 2, WEIGHT_1 = 0;
+			<div class="legend">
+				<span class="dot alto"></span> Alto (3)
+				<span class="dot medio"></span> Médio (2)
+				<span class="dot baixo"></span> Baixo (1)
+				<span class="pill">Fonte: acidentes_unificado_pontos.geojson (Sudeste)</span>
+			</div>
+		</div>
+	</header>
 
-  // ================== MAPA ====================
-  const map = L.map('map', { preferCanvas:true }).setView([-21.0, -43.5], 6);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'&copy; OpenStreetMap' }).addTo(map);
+	<div id="map"></div>
 
-  // ================== ACIDENTES ===============
-  let accidents = []; // {lat,lng,risk_num,risk,color,props,popupHTML}
-  let accLayer = L.layerGroup().addTo(map);
-  let routesLayer = L.layerGroup().addTo(map);
+	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+	<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
+	<script>
+	// ================== CONFIG ==================
+	const ACCIDENTS_GEOJSON_URL = "acidentes_unificado_pontos.geojson"; // Sudeste unificado
+	const OSRM_SELFHOST_URL = "http://127.0.0.1:5000/route/v1"; // seu OSRM local
+	// Pesos para pontuação de risco (penaliza 3 e 2)
+	const WEIGHT_3 = 5, WEIGHT_2 = 2, WEIGHT_1 = 0;
 
-  function makePopupHTML(p){
-    const label = p.risk_num===3?'Alto risco — vítima fatal':
-                  p.risk_num===2?'Médio risco — feridos':'Baixo risco';
-    const rows = [];
-    if (p.props?.tracado_via) rows.push(['Ponto', p.props.tracado_via]);
-    if (p.props?.Trecho_Completo) rows.push(['Trecho', p.props.Trecho_Completo]);
-    for (const k of ['condicao_metereologica','tipo_pista','dia_semana','horario','Soma de mortos','Soma de feridos_graves','Soma de feridos_leves']){
-      if (p.props && p.props[k]!=null && String(p.props[k]).trim()!=='') rows.push([k, p.props[k]]);
-    }
-    const trs = rows.slice(0,12).map(([k,v])=>`<tr><td style="padding:4px 8px 4px 0;color:#9ca3af;font-weight:600">${k}</td><td style="padding:4px 0">${String(v)}</td></tr>`).join('');
-    return `<div style="min-width:280px">
-      <div style="background:${p.color};color:#fff;padding:6px 10px;border-radius:8px;font-weight:700;margin-bottom:8px">${label}</div>
-      <table style="width:100%;font-size:13px;line-height:1.4">${trs || '<tr><td colspan="2" style="color:#9ca3af">Sem detalhes</td></tr>'}</table>
-    </div>`;
-  }
+	// ================== MAPA ====================
+	const map = L.map('map', { preferCanvas:true }).setView([-21.0, -43.5], 6);
+	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'&copy; OpenStreetMap' }).addTo(map);
 
-  async function loadAccidents(){
-    const res = await fetch(ACCIDENTS_GEOJSON_URL);
-    const gj = await res.json();
-    accidents = (gj.features||[])
-      .filter(f => f.geometry && f.geometry.type === 'Point')
-      .map(f => {
-        const [lng, lat] = f.geometry.coordinates;
-        const risk_num = Number(f.properties?.risk_num) || 1;
-        const color = risk_num===3? '#ef4444' : risk_num===2? '#f59e0b' : '#10b981';
-        const risk = risk_num===3? 'alto' : risk_num===2? 'medio' : 'baixo';
-        const props = f.properties || {};
-        const p = { lat, lng, risk_num, risk, color, props };
-        p.popupHTML = makePopupHTML(p);
-        return p;
-      });
-  }
+	// ================== ACIDENTES ===============
+	let accidents = []; // {lat,lng,risk_num,risk,color,props,popupHTML}
+	let accLayer = L.layerGroup().addTo(map);
+	let routesLayer = L.layerGroup().addTo(map);
 
-  // ========== GEO HELPERS / BUFFER ===========
-  function haversine(a,b){
-    const R=6371000, toRad=x=>x*Math.PI/180;
-    const dLat=toRad(b.lat-a.lat), dLon=toRad(b.lng-a.lng);
-    const lat1=toRad(a.lat), lat2=toRad(b.lat);
-    const h=Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
-    return 2*R*Math.asin(Math.sqrt(h));
-  }
-  function samplePolyline(latlngs, everyMeters=400){
-    const out=[]; let acc=0;
-    for(let i=1;i<latlngs.length;i++){
-      const a=latlngs[i-1], b=latlngs[i];
-      const d=haversine(a,b); acc+=d;
-      if(acc>=everyMeters){ out.push({lat:b.lat,lng:b.lng}); acc=0; }
-    }
-    if(!out.length && latlngs.length){
-      const last = latlngs[latlngs.length-1];
-      out.push({lat:last.lat,lng:last.lng});
-    }
-    return out;
-  }
-  function filterByBuffer(routeCoords, bufferMeters){
-    const sampled = samplePolyline(routeCoords, Math.min(800, bufferMeters));
-    const picked = new Set();
-    for(const s of sampled){
-      for(const p of accidents){
-        if(haversine(s,p) <= bufferMeters){
-          picked.add(`${p.lat.toFixed(5)}_${p.lng.toFixed(5)}`);
-        }
-      }
-    }
-    const lookup = new Map(accidents.map(p=>[`${p.lat.toFixed(5)}_${p.lng.toFixed(5)}`, p]));
-    return Array.from(picked).map(k=>lookup.get(k)).filter(Boolean);
-  }
+	function makePopupHTML(p){
+		const label = p.risk_num===3?'Alto risco — vítima fatal':
+									p.risk_num===2?'Médio risco — feridos':'Baixo risco';
+		const rows = [];
+		if (p.props?.tracado_via) rows.push(['Ponto', p.props.tracado_via]);
+		if (p.props?.Trecho_Completo) rows.push(['Trecho', p.props.Trecho_Completo]);
+		for (const k of ['condicao_metereologica','tipo_pista','dia_semana','horario','Soma de mortos','Soma de feridos_graves','Soma de feridos_leves']){
+			if (p.props && p.props[k]!=null && String(p.props[k]).trim()!=='') rows.push([k, p.props[k]]);
+		}
+		const trs = rows.slice(0,12).map(([k,v])=>`<tr><td style="padding:4px 8px 4px 0;color:#9ca3af;font-weight:600">${k}</td><td style="padding:4px 0">${String(v)}</td></tr>`).join('');
+		return `<div style="min-width:280px">
+			<div style="background:${p.color};color:#fff;padding:6px 10px;border-radius:8px;font-weight:700;margin-bottom:8px">${label}</div>
+			<table style="width:100%;font-size:13px;line-height:1.4">${trs || '<tr><td colspan="2" style="color:#9ca3af">Sem detalhes</td></tr>'}</table>
+		</div>`;
+	}
 
-  // ======= SCORE DA ROTA (menor é melhor) ====
-  function scoreRoute(routeCoords, bufferMeters){
-    const inRange = filterByBuffer(routeCoords, bufferMeters);
-    let c3=0, c2=0, c1=0;
-    for(const p of inRange){
-      if(p.risk_num===3) c3++;
-      else if(p.risk_num===2) c2++;
-      else c1++;
-    }
-    const score = c3*WEIGHT_3 + c2*WEIGHT_2 + c1*WEIGHT_1;
-    return { score, c3, c2, c1, points: inRange };
-  }
+	async function loadAccidents(){
+		const res = await fetch(ACCIDENTS_GEOJSON_URL);
+		const gj = await res.json();
+		accidents = (gj.features||[])
+			.filter(f => f.geometry && f.geometry.type === 'Point')
+			.map(f => {
+				const [lng, lat] = f.geometry.coordinates;
+				const risk_num = Number(f.properties?.risk_num) || 1;
+				const color = risk_num===3? '#ef4444' : risk_num===2? '#f59e0b' : '#10b981';
+				const risk = risk_num===3? 'alto' : risk_num===2? 'medio' : 'baixo';
+				const props = f.properties || {};
+				const p = { lat, lng, risk_num, risk, color, props };
+				p.popupHTML = makePopupHTML(p);
+				return p;
+			});
+	}
 
-  // ========= DESENHO ROTAS / PONTOS ==========
-  function drawAttentionPoints(points){
-    accLayer.clearLayers();
-    const markers = points.map(p=>{
-      const m = L.circleMarker([p.lat,p.lng],{
-        radius: p.risk_num===3? 7 : p.risk_num===2? 6 : 5,
-        color: "rgba(255,255,255,.85)",
-        weight: 1.2,
-        fillColor: p.color,
-        fillOpacity: .95
-      });
-      m.bindPopup(p.popupHTML, {maxWidth:360});
-      return m;
-    });
-    L.layerGroup(markers).addTo(accLayer);
-  }
+	// ========== GEO HELPERS / BUFFER ===========
+	function haversine(a,b){
+		const R=6371000, toRad=x=>x*Math.PI/180;
+		const dLat=toRad(b.lat-a.lat), dLon=toRad(b.lng-a.lng);
+		const lat1=toRad(a.lat), lat2=toRad(b.lat);
+		const h=Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
+		return 2*R*Math.asin(Math.sqrt(h));
+	}
+	function samplePolyline(latlngs, everyMeters=400){
+		const out=[]; let acc=0;
+		for(let i=1;i<latlngs.length;i++){
+			const a=latlngs[i-1], b=latlngs[i];
+			const d=haversine(a,b); acc+=d;
+			if(acc>=everyMeters){ out.push({lat:b.lat,lng:b.lng}); acc=0; }
+		}
+		if(!out.length && latlngs.length){
+			const last = latlngs[latlngs.length-1];
+			out.push({lat:last.lat,lng:last.lng});
+		}
+		return out;
+	}
+	function filterByBuffer(routeCoords, bufferMeters){
+		const sampled = samplePolyline(routeCoords, Math.min(800, bufferMeters));
+		const picked = new Set();
+		for(const s of sampled){
+			for(const p of accidents){
+				if(haversine(s,p) <= bufferMeters){
+					picked.add(`${p.lat.toFixed(5)}_${p.lng.toFixed(5)}`);
+				}
+			}
+		}
+		const lookup = new Map(accidents.map(p=>[`${p.lat.toFixed(5)}_${p.lng.toFixed(5)}`, p]));
+		return Array.from(picked).map(k=>lookup.get(k)).filter(Boolean);
+	}
 
-  function drawRoutesScored(results, best){
-    routesLayer.clearLayers();
-    for(const r of results){
-      const isBest = r===best;
-      L.polyline(r.route.coordinates, {
-        color: isBest? '#10b981' : '#3b82f6',
-        weight: isBest? 6 : 4,
-        opacity: isBest? .95 : .4
-      }).addTo(routesLayer);
-    }
-    map.fitBounds(L.polyline(best.route.coordinates).getBounds(), { padding:[30,30] });
-  }
+	// ======= SCORE DA ROTA (menor é melhor) ====
+	function scoreRoute(routeCoords, bufferMeters){
+		const inRange = filterByBuffer(routeCoords, bufferMeters);
+		let c3=0, c2=0, c1=0;
+		for(const p of inRange){
+			if(p.risk_num===3) c3++;
+			else if(p.risk_num===2) c2++;
+			else c1++;
+		}
+		const score = c3*WEIGHT_3 + c2*WEIGHT_2 + c1*WEIGHT_1;
+		return { score, c3, c2, c1, points: inRange };
+	}
 
-  function updateStats(results){
-    const routesInfo = document.getElementById('routesInfo');
-    const bestScore = document.getElementById('bestScore');
-    const scoreBreak = document.getElementById('scoreBreakdown');
-    routesInfo.innerHTML = results.map((r,i)=>
-      `Rota ${i+1}: <span class="pill">score ${r.score}</span> `+
-      `<span class="pill">3: ${r.c3}</span> `+
-      `<span class="pill">2: ${r.c2}</span> `+
-      `<span class="pill">1: ${r.c1}</span>`
-    ).join('<br>');
-    const best = results.reduce((a,b)=> a.score<=b.score ? a : b);
-    bestScore.textContent = best.score;
-    const buf = document.getElementById('buffer').value;
-    scoreBreak.innerHTML = `3: <b>${best.c3}</b> · 2: <b>${best.c2}</b> · 1: <b>${best.c1}</b> · Buffer: <b>${buf} m</b>`;
-  }
+	// ========= DESENHO ROTAS / PONTOS ==========
+	function drawAttentionPoints(points){
+	accLayer.clearLayers();
+	const markers = points.map(p=>{
+		const m = L.circleMarker([p.lat,p.lng],{
+			radius: p.risk_num===3 ? 14 : p.risk_num===2 ? 11 : 9, // <<< aumentei os tamanhos
+			color: "rgba(255,255,255,1)", // borda clara bem visível
+			weight: 2.5, // borda mais grossa
+			fillColor: p.color,
+			fillOpacity: 1 // preenchimento sólido
+		});
+		m.bindPopup(p.popupHTML, {maxWidth:380});
+		return m;
+	});
+	L.layerGroup(markers).addTo(accLayer);
+}
 
-  // =============== ROTEAMENTO ===============
-  let control;
-  function traceRoute(origin, destination){
-    if(control) map.removeControl(control);
-    const btn = document.getElementById('go');
-    btn.textContent = 'Calculando rota...'; btn.classList.add('loading'); btn.disabled = true;
 
-    control = L.Routing.control({
-      waypoints: [ L.latLng(origin[0],origin[1]), L.latLng(destination[0],destination[1]) ],
-      router: L.Routing.osrmv1({ serviceUrl: OSRM_SELFHOST_URL, profile: 'driving', timeout: 12000 }),
-      show: false, addWaypoints: false, routeWhileDragging: false,
-      showAlternatives: true,
-      altLineOptions: { styles: [{ color:'#3b82f6', weight:4, opacity:.4, dashArray:'6 8'}] },
-      lineOptions: { styles: [{ color:'#10b981', weight:6, opacity:.95 }] }
-    })
-    .on('routesfound', (e)=>{
-      const buffer = parseInt(document.getElementById('buffer').value,10) || 500;
-      const routes = e.routes || [];
-      if(!routes.length){ alert('Nenhuma rota encontrada.'); btn.textContent='Traçar rota segura'; btn.classList.remove('loading'); btn.disabled=false; return; }
+	function drawRoutesScored(results, best) {
+		routesLayer.clearLayers();
 
-      const results = routes.map(r=>{
-        const coords = r.coordinates.map(c=>({lat:c.lat, lng:c.lng}));
-        const s = scoreRoute(coords, buffer);
-        return { route: r, ...s };
-      });
-      const best = results.reduce((a,b)=> a.score<=b.score ? a : b);
+		results.forEach((r, i) => {
+			const isBest = r === best;
 
-      drawRoutesScored(results, best);
-      drawAttentionPoints(best.points);
-      updateStats(results);
+			// Desenha a linha da rota
+			const poly = L.polyline(r.route.coordinates, {
+				color: isBest ? '#10b981' : '#3b82f6',
+				weight: isBest ? 6 : 4,
+				opacity: isBest ? .95 : .4
+			}).addTo(routesLayer);
 
-      btn.textContent = 'Traçar rota segura'; btn.classList.remove('loading'); btn.disabled = false;
-    })
-    .on('routingerror', ()=>{
-      alert('Erro ao calcular a rota. Verifique o OSRM e tente novamente.');
-      btn.textContent = 'Traçar rota segura'; btn.classList.remove('loading'); btn.disabled = false;
-    })
-    .addTo(map);
-  }
+			// Pega o ponto central da rota
+			const midIndex = Math.floor(r.route.coordinates.length / 2);
+			const midPoint = r.route.coordinates[midIndex];
 
-  // =============== UI =======================
-  document.getElementById('go').addEventListener('click', ()=>{
-    const o = document.getElementById('origin').value.split(',').map(parseFloat);
-    const d = document.getElementById('destination').value.split(',').map(parseFloat);
-    if(o.length<2||d.length<2||Number.isNaN(o[0])||Number.isNaN(d[0])){ alert('Selecione origem e destino válidos.'); return; }
-    traceRoute([o[0],o[1]], [d[0],d[1]]);
-  });
+			// Adiciona o label no meio da rota
+			// L.marker([midPoint.lat, midPoint.lng], {
+			// 	interactive: false,
+			// 	icon: L.divIcon({
+			// 		className: '', // <<< removi a classe para não herdar nada
+			// 		html: `
+			// 			<div style="
+			// 				display:inline-block;
+			// 				background: rgba(17,24,39,0.9);
+			// 				color: #fff !important;
+			// 				padding: 4px 10px;
+			// 				border-radius: 6px;
+			// 				font-size: 13px;
+			// 				font-weight: 700;
+			// 				white-space: nowrap;
+			// 				box-shadow: 0 2px 6px rgba(0,0,0,.4);
+			// 			">
+			// 				Rota ${i+1}
+			// 			</div>
+			// 		`
+			// 	})
+			// }).addTo(routesLayer);
+		});
 
-  // Boot: carrega acidentes
-  (async function main(){ await loadAccidents(); })();
-  </script>
+		// Centraliza no melhor trajeto
+		map.fitBounds(L.polyline(best.route.coordinates).getBounds(), { padding:[30,30] });
+}
+
+	function updateStats(results){
+		const routesInfo = document.getElementById('routesInfo');
+		const bestScore = document.getElementById('bestScore');
+		const scoreBreak = document.getElementById('scoreBreakdown');
+		routesInfo.innerHTML = results.map((r,i)=>
+			`Rota ${i+1}: <span class="pill">score ${r.score}</span> `+
+			`<span class="pill">3: ${r.c3}</span> `+
+			`<span class="pill">2: ${r.c2}</span> `+
+			`<span class="pill">1: ${r.c1}</span>`
+		).join('<br>');
+		const best = results.reduce((a,b)=> a.score<=b.score ? a : b);
+		bestScore.textContent = best.score;
+		const buf = document.getElementById('buffer').value;
+		scoreBreak.innerHTML = `3: <b>${best.c3}</b> · 2: <b>${best.c2}</b> · 1: <b>${best.c1}</b> · Buffer: <b>${buf} m</b>`;
+	}
+
+	// =============== ROTEAMENTO ===============
+	let control;
+	function traceRoute(origin, destination){
+		if(control) map.removeControl(control);
+		const btn = document.getElementById('go');
+		btn.textContent = 'Calculando rota...'; btn.classList.add('loading'); btn.disabled = true;
+
+		control = L.Routing.control({
+			waypoints: [ L.latLng(origin[0],origin[1]), L.latLng(destination[0],destination[1]) ],
+			router: L.Routing.osrmv1({ serviceUrl: OSRM_SELFHOST_URL, profile: 'driving', timeout: 12000 }),
+			show: false, addWaypoints: false, routeWhileDragging: false,
+			showAlternatives: true,
+			altLineOptions: { styles: [{ color:'#3b82f6', weight:4, opacity:.4, dashArray:'6 8'}] },
+			lineOptions: { styles: [{ color:'#10b981', weight:6, opacity:.95 }] }
+		})
+		.on('routesfound', (e)=>{
+			const buffer = parseInt(document.getElementById('buffer').value,10) || 500;
+			const routes = e.routes || [];
+			if(!routes.length){ alert('Nenhuma rota encontrada.'); btn.textContent='Traçar rota segura'; btn.classList.remove('loading'); btn.disabled=false; return; }
+
+			// calcula score de cada rota
+			const results = routes.map(r=>{
+				const coords = r.coordinates.map(c=>({lat:c.lat, lng:c.lng}));
+				const s = scoreRoute(coords, buffer);
+				return { route: r, ...s };
+			});
+
+			// 🔑 agora ordena por score (menor = mais segura)
+			const sorted = results.slice().sort((a,b)=> a.score - b.score);
+			const best = sorted[0];
+
+			drawRoutesScored(sorted, best);
+			drawAttentionPoints(best.points);
+			updateStats(sorted);
+
+			btn.textContent = 'Traçar rota segura'; btn.classList.remove('loading'); btn.disabled = false;
+		})
+
+		.on('routingerror', ()=>{
+			alert('Erro ao calcular a rota. Verifique o OSRM e tente novamente.');
+			btn.textContent = 'Traçar rota segura'; btn.classList.remove('loading'); btn.disabled = false;
+		})
+		.addTo(map);
+	}
+
+	// =============== UI =======================
+	document.getElementById('go').addEventListener('click', ()=>{
+		const o = document.getElementById('origin').value.split(',').map(parseFloat);
+		const d = document.getElementById('destination').value.split(',').map(parseFloat);
+		if(o.length<2||d.length<2||Number.isNaN(o[0])||Number.isNaN(d[0])){ alert('Selecione origem e destino válidos.'); return; }
+		traceRoute([o[0],o[1]], [d[0],d[1]]);
+	});
+
+	// Boot: carrega acidentes
+	(async function main(){ await loadAccidents(); })();
+	</script>
 </body>
 </html>
