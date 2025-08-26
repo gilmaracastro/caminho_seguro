@@ -4,7 +4,7 @@
 # Caminhos Seguros — Sudeste (Leaflet + OSRM)
 
 Mapa que prioriza **rotas mais seguras** no Sudeste usando pontos de risco de acidentes.  
-Front em **Leaflet**, roteamento com **OSRM**. Clone, rode e use — seja feliz.
+Front em **Leaflet**, roteamento com **OSRM**. Clone, rode, use e seja feliz.
 
 ---
 
