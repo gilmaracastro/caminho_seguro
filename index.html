@@ -3,45 +3,103 @@
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>Caminho Seguro — Sudeste (Leaflet + OSRM)</title>
+	<title>Caminhos Seguros — Sudeste (Leaflet + OSRM)</title>
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 	<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 	<style>
 		:root{
-			--bg:#0a0f1c; --panel:#111827; --card:#1f2937; --muted:#9ca3af;
-			--ok:#10b981; --warn:#f59e0b; --danger:#ef4444; --accent:#3b82f6; --border:#374151;
+			--primary-green:#1B5E20; --secondary-green:#2E7D32; --accent-green:#4CAF50;
+			--bg-dark:#0D1117; --bg-panel:#161B22; --bg-card:#21262D;
+			--text-primary:#F0F6FF; --text-secondary:#8B949E; --text-muted:#6E7681;
+			--border:#30363D; --danger:#F85149; --warning:#D29922; --success:#3FB950; --accent:#58A6FF;
 		}
 		*{box-sizing:border-box}
-		body{margin:0;background:var(--bg);color:#f9fafb;font-family:Inter,system-ui,Segoe UI,Roboto,sans-serif}
-		header{position:sticky;top:0;z-index:10;background:var(--panel);border-bottom:1px solid var(--border)}
-		.wrap{max-width:1400px;margin:0 auto;padding:16px}
-		.row{display:grid;grid-template-columns:1fr 1fr 200px auto;gap:12px;align-items:end}
-		label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
-		select,button{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#0b1220;color:#e5e7eb}
-		button{background:linear-gradient(90deg,var(--ok),#059669);font-weight:700;border:none;cursor:pointer}
-		#map{height:calc(100vh - 210px)}
-		.legend{display:flex;gap:16px;align-items:center;margin-top:10px;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:12px}
-		.dot{width:12px;height:12px;border-radius:999px;display:inline-block}
-		.alto{background:var(--danger)} .medio{background:var(--warn)} .baixo{background:var(--ok)}
-		.panel{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-		.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px}
-		.score{font-size:24px;font-weight:800}
-		.pill{display:inline-block;background:#0b1220;border:1px solid #334155;border-radius:999px;padding:2px 8px;font-size:12px;color:#cbd5e1}
-		.loading{opacity:.7}
-		/* Leaflet popup dark */
-		.leaflet-popup-content-wrapper{background:var(--card);border:1px solid var(--border);border-radius:12px}
-		.leaflet-popup-content{color:#f9fafb;margin:12px}
-		.leaflet-popup-tip{background:var(--card);border:1px solid var(--border)}
+		html,body{height:100%}
+		body{
+			margin:0; font-family:'Inter',system-ui,Segoe UI,Roboto,Arial,sans-serif;
+			color:var(--text-primary); background:linear-gradient(135deg,var(--bg-dark) 0%,#0A0E1A 100%);
+		}
+		/* ======= LAYOUT: sidebar left + map right ======= */
+		.app{
+			display:flex; height:100vh; width:100vw; overflow:hidden;
+		}
+		.sidebar{
+			width:380px; min-width:320px; max-width:440px;
+			height:100%; overflow-y:auto;
+			background:rgba(13,17,23,.95); backdrop-filter:blur(16px);
+			border-right:1px solid var(--border);
+		}
+		.sidebar .content{padding:20px}
+		.brand{display:flex;align-items:center;gap:14px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+		.logo{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--primary-green),var(--accent-green));display:grid;place-items:center;box-shadow:0 8px 24px rgba(76,175,80,.25)}
+		.logo::before{content:'🛡️';font-size:24px}
+		.brand h1{margin:0;font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--accent-green),#66BB6A);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+		.brand p{margin:2px 0 0;color:var(--text-secondary);font-size:12px}
+		.controls{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:14px}
+		.input-group{display:flex;flex-direction:column;gap:6px}
+		.input-label{font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+		.select-input, .btn-primary{
+			padding:12px 14px;border-radius:12px;border:2px solid var(--border);
+			background:var(--bg-card);color:var(--text-primary);font-size:14px;outline:none;
+		}
+		.select-input:focus{border-color:var(--accent-green);box-shadow:0 0 0 3px rgba(76,175,80,.12)}
+		.btn-primary{
+			cursor:pointer;background:linear-gradient(135deg,var(--accent-green),var(--secondary-green));
+			border-color:var(--accent-green);font-weight:800;text-transform:uppercase;letter-spacing:.4px;
+		}
+		.btn-primary.loading{opacity:.8;cursor:not-allowed;animation:pulse 1.6s infinite}
+		@keyframes pulse{0%,100%{opacity:.85}50%{opacity:.6}}
+
+		.panel{
+			display:grid;gap:12px;margin:14px 0 18px;
+		}
+		.card{
+			background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:16px;position:relative;overflow:hidden;
+		}
+		.card::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--accent-green),var(--secondary-green))}
+		.card .label{color:var(--text-secondary);font-size:11px;text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:10px}
+		.stats-value{font-size:22px;font-weight:900;color:var(--accent-green);margin-bottom:6px}
+		.route-info{font-size:13px;line-height:1.6}
+		.info-badge{display:inline-block;background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.3);border-radius:12px;padding:4px 8px;font-size:11px;color:var(--accent);font-weight:700;margin:2px 6px 2px 0}
+		.legend{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+		.legend-item{display:flex;gap:8px;align-items:center;font-size:13px}
+		.dot{width:14px;height:14px;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+		.alto{background:var(--danger)} .medio{background:var(--warning)} .baixo{background:var(--success)}
+		.source{margin-left:auto;background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.3);border-radius:999px;padding:6px 10px;color:var(--accent);font-size:11px;font-weight:600}
+
+		.map-wrap{flex:1;min-width:0;height:100%}
+		#map{height:100%;width:100%}
+
+		/* Leaflet popups dark */
+		.leaflet-popup-content-wrapper{background:var(--bg-card);border:1px solid var(--border);border-radius:16px}
+		.leaflet-popup-content{color:var(--text-primary);margin:14px}
+		.leaflet-popup-tip{background:var(--bg-card);border:1px solid var(--border)}
+
+		/* Mobile: sidebar vira topo */
+		@media (max-width: 860px){
+			.app{flex-direction:column}
+			.sidebar{width:100%;height:auto;max-height:62vh}
+			.map-wrap{height:calc(100vh - 62vh)}
+		}
 	</style>
 </head>
 <body>
-	<header>
-		<div class="wrap">
-			<div class="row">
+<div class="app">
+	<aside class="sidebar">
+		<div class="content">
+			<div class="brand">
+				<div class="logo"></div>
 				<div>
-					<label>Origem</label>
-					<select id="origin">
+					<h1>Caminhos Seguros</h1>
+					<p>Rotas mais seguras no Sudeste</p>
+				</div>
+			</div>
+
+			<div class="controls">
+				<div class="input-group">
+					<label class="input-label">Origem</label>
+					<select id="origin" class="select-input">
 						<option value="-22.9068,-43.1729">Rio de Janeiro, RJ</option>
 						<option value="-23.5505,-46.6333">São Paulo, SP</option>
 						<option value="-19.9167,-43.9345">Belo Horizonte, MG</option>
@@ -54,9 +112,10 @@
 						<option value="-20.1211,-40.3074">Serra, ES</option>
 					</select>
 				</div>
-				<div>
-					<label>Destino</label>
-					<select id="destination">
+
+				<div class="input-group">
+					<label class="input-label">Destino</label>
+					<select id="destination" class="select-input">
 						<option value="-20.3197,-40.3378">Vitória, ES</option>
 						<option value="-22.9068,-43.1729">Rio de Janeiro, RJ</option>
 						<option value="-23.5505,-46.6333">São Paulo, SP</option>
@@ -69,323 +128,263 @@
 						<option value="-20.1211,-40.3074">Serra, ES</option>
 					</select>
 				</div>
-				<div>
-					<label>Buffer</label>
-					<select id="buffer">
+
+				<div class="input-group">
+					<label class="input-label">Buffer</label>
+					<select id="buffer" class="select-input">
 						<option value="500" selected>500 m</option>
 						<option value="750">750 m</option>
 						<option value="1000">1 km</option>
 					</select>
 				</div>
-				<div>
-					<button id="go">Traçar rota segura</button>
-				</div>
+
+				<button id="go" class="btn-primary">🚀 Traçar Rota</button>
 			</div>
 
 			<div class="panel">
 				<div class="card">
-					<div style="color:var(--muted);font-size:12px">Rotas avaliadas</div>
-					<div id="routesInfo" class="small">—</div>
+					<div class="label">Análise de Rotas</div>
+					<div id="routesInfo" class="route-info">Aguardando cálculo...</div>
 				</div>
 				<div class="card">
-					<div style="color:var(--muted);font-size:12px">Pontuação (maior = mais segura)</div>
-					<div id="bestScore" class="score">—</div>
-					<div id="scoreBreakdown" style="color:var(--muted);font-size:12px"></div>
+					<div class="label">Pontuação de Segurança</div>
+					<div id="bestScore" class="stats-value">—</div>
+					<div id="scoreBreakdown" class="route-info">Maior pontuação indica rota mais segura</div>
+				</div>
+				<div class="card">
+					<div class="label">Legenda</div>
+					<div class="legend">
+						<span class="legend-item"><span class="dot alto"></span> Alto Risco (3)</span>
+						<span class="legend-item"><span class="dot medio"></span> Médio Risco (2)</span>
+						<span class="legend-item"><span class="dot baixo"></span> Baixo Risco (1)</span>
+						<span class="source">📊 trecho_moda.geojson</span>
+					</div>
 				</div>
 			</div>
 
-			<div class="legend">
-				<span class="dot alto"></span> Alto (3)
-				<span class="dot medio"></span> Médio (2)
-				<span class="dot baixo"></span> Baixo (1)
-				<span class="pill">Fonte: trecho_moda.geojson</span>
-			</div>
 		</div>
-	</header>
+	</aside>
 
-	<div id="map"></div>
+	<main class="map-wrap">
+		<div id="map"></div>
+	</main>
+</div>
 
-	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-	<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
-	<script>
-	// ================== CONFIG ==================
-	const ACCIDENTS_GEOJSON_URL = "trecho_moda.geojson";
-	const OSRM_SELFHOST_URL = "http://127.0.0.1:5000/route/v1";
-	const WEIGHT_3 = 5, WEIGHT_2 = 2, WEIGHT_1 = 0;
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
+<script>
+/* ================== CONFIG ================== */
+const ACCIDENTS_GEOJSON_URL = "trecho_moda.geojson";
+const OSRM_SELFHOST_URL = "http://127.0.0.1:5000/route/v1";
+const WEIGHT_3 = 5, WEIGHT_2 = 2, WEIGHT_1 = 0;
+const DENSITY_MIDPOINT = 0.30, DENSITY_STEEPNESS = 4.0;
 
-	// ================== MAPA ====================
-	const map = L.map('map', { preferCanvas:true }).setView([-21.0, -43.5], 6);
-	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'&copy; OpenStreetMap' }).addTo(map);
+/* ================== MAPA ==================== */
+const map = L.map('map', { preferCanvas:true }).setView([-21.0, -43.5], 6);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap'}).addTo(map);
 
-	// ================== DADOS ===================
-	let accidents = [];         // todos (com br)
-	let accIndex = new Map();   // grid para busca rápida
-	let accLayer = L.layerGroup().addTo(map);
-	let routesLayer = L.layerGroup().addTo(map);
+/* ================== DADOS =================== */
+let accidents=[], accIndex=new Map();
+let accLayer=L.layerGroup().addTo(map), routesLayer=L.layerGroup().addTo(map);
 
-	function makePopupHTML(p){
-		const tag = p.alert_label ? p.alert_label.toUpperCase() : (p.alert_level===3?'ALTO RISCO':p.alert_level===2?'MÉDIO RISCO':'BAIXO RISCO');
-		const pr = p.props || {};
-		const rows = [];
-		if (pr.characteristics) rows.push(['Ponto', pr.characteristics]);
-		if (pr.trecho) rows.push(['Trecho', pr.trecho]);
-		if (pr.city || pr.uf) rows.push(['Cidade/UF', `${pr.city||'-'}/${pr.uf||'-'}`]);
-		if (pr.br) rows.push(['BR', pr.br]);
+function makePopupHTML(p){
+	const tag = p.alert_label ? p.alert_label.toUpperCase() : (p.alert_level===3?'ALTO RISCO':p.alert_level===2?'MÉDIO RISCO':'BAIXO RISCO');
+	const pr = p.props || {};
+	const rows=[];
+	if (pr.characteristics) rows.push(['Ponto', pr.characteristics]);
+	if (pr.trecho) rows.push(['Trecho', pr.trecho]);
+	if (pr.city || pr.uf) rows.push(['Cidade/UF', `${pr.city||'-'}/${pr.uf||'-'}`]);
+	if (pr.br) rows.push(['BR', pr.br]);
+	for (const [k,label] of [
+		['weather','Condição'],['road_type','Tipo de pista'],['weekday','Dia da semana'],['time','Horário'],
+		['deaths','Mortes'],['injuries_severe','Feridos graves'],['injuries_minor','Feridos leves'],
+	]){
+		if (pr[k]!=null && String(pr[k]).trim()!=='') rows.push([label, pr[k]]);
+	}
+	const trs = rows.map(([k,v])=>`<tr><td style="padding:4px 8px;color:#8B949E;font-weight:700">${k}</td><td>${v}</td></tr>`).join('');
+	return `<div style="min-width:280px">
+		<div style="background:${p.color};color:#fff;padding:8px 12px;border-radius:12px;font-weight:800;margin-bottom:12px">${tag}</div>
+		<table style="width:100%;font-size:13px">${trs || '<tr><td colspan="2" style="color:#8B949E">Sem detalhes</td></tr>'}</table>
+	</div>`;
+}
 
-		for (const [k,label] of [
-			['weather','Condição'],['road_type','Tipo de pista'],
-			['weekday','Dia da semana'],['time','Horário'],
-			['deaths','Mortes'],['injuries_severe','Feridos graves'],
-			['injuries_minor','Feridos leves'],
-		]){
-			if (pr[k]!==undefined && pr[k]!==null && String(pr[k]).trim()!=='') {
-				rows.push([label, pr[k]]);
+async function loadAccidents(){
+	if (location.protocol === 'file:') {
+		console.error('Abra via HTTP. Ex.: php -S 0.0.0.0:8000 -t .');
+		document.getElementById('scoreBreakdown').innerHTML = '⚠️ Sirva via HTTP (ex.: <code>php -S 0.0.0.0:8000 -t .</code>) para carregar o GeoJSON.';
+		throw new Error('file:// bloqueia fetch do GeoJSON');
+	}
+	const res = await fetch(ACCIDENTS_GEOJSON_URL);
+	if(!res.ok) throw new Error('Falha ao carregar GeoJSON: '+res.status);
+	const gj = await res.json();
+
+	accidents = (gj.features||[])
+		.filter(f=>f.geometry?.type==='Point')
+		.map(f=>{
+			const [lng,lat]=f.geometry.coordinates;
+			const pr=f.properties||{};
+			const level=Number(pr.alert_level)||1;
+			const color= level===3 ? '#F85149' : level===2 ? '#D29922' : '#3FB950';
+			const p={lat,lng,alert_level:level,alert_label:pr.alert_label,color,props:pr};
+			p.popupHTML=makePopupHTML(p);
+			return p;
+		});
+	accIndex.clear();
+	accidents.forEach(p=>{
+		const cell=`${Math.floor(p.lat*10)}_${Math.floor(p.lng*10)}`;
+		if(!accIndex.has(cell)) accIndex.set(cell,[]);
+		accIndex.get(cell).push(p);
+	});
+}
+
+/* ========== GEO ========= */
+function haversine(a,b){
+	const R=6371000,toRad=x=>x*Math.PI/180;
+	const dLat=toRad(b.lat-a.lat), dLon=toRad(b.lng-a.lng);
+	const lat1=toRad(a.lat), lat2=toRad(b.lat);
+	const h=Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
+	return 2*R*Math.asin(Math.sqrt(h));
+}
+function samplePolyline(latlngs,everyMeters=400){
+	const out=[]; let acc=0;
+	for(let i=1;i<latlngs.length;i++){
+		const a=latlngs[i-1], b=latlngs[i]; const d=haversine(a,b); acc+=d;
+		if(acc>=everyMeters){ out.push({lat:b.lat,lng:b.lng}); acc=0; }
+	}
+	if(!out.length && latlngs.length){ const last=latlngs[latlngs.length-1]; out.push({lat:last.lat,lng:last.lng}); }
+	return out;
+}
+function nearbyPoints(lat,lng){
+	const cLat=Math.floor(lat*10), cLng=Math.floor(lng*10), pts=[];
+	for(let i=cLat-2;i<=cLat+2;i++){
+		for(let j=cLng-2;j<=cLng+2;j++){
+			const cell=`${i}_${j}`; if(accIndex.has(cell)) pts.push(...accIndex.get(cell));
+		}
+	}
+	return pts;
+}
+function filterByBuffer(routeCoords, bufferMeters){
+	const sampled=samplePolyline(routeCoords, Math.min(800, bufferMeters));
+	const picked=new Set(), res=[];
+	for(const s of sampled){
+		for(const p of nearbyPoints(s.lat,s.lng)){
+			if(haversine(s,p) <= bufferMeters){
+				const key=`${p.lat.toFixed(5)}_${p.lng.toFixed(5)}`;
+				if(!picked.has(key)){ picked.add(key); res.push(p); }
 			}
 		}
-
-		const trs = rows.map(([k,v])=>`<tr><td style="padding:4px 8px;color:#9ca3af;font-weight:600">${k}</td><td>${v}</td></tr>`).join('');
-		return `<div style="min-width:280px">
-			<div style="background:${p.color};color:#fff;padding:6px 10px;border-radius:8px;font-weight:700;margin-bottom:8px">${tag}</div>
-			<table style="width:100%;font-size:13px">${trs || '<tr><td colspan="2" style="color:#9ca3af">Sem detalhes</td></tr>'}</table>
-		</div>`;
 	}
+	return res;
+}
+function routeLengthKm(coords){
+	if(!Array.isArray(coords)||coords.length<2) return 0;
+	let total=0; for(let i=1;i<coords.length;i++){ total+=haversine(coords[i-1],coords[i]); }
+	return total/1000;
+}
 
-	async function loadAccidents(){
-		const res = await fetch(ACCIDENTS_GEOJSON_URL);
-		const gj = await res.json();
+/* ======= SCORE ======= */
+function scoreRoute(routeCoords, bufferMeters){
+	const pts=filterByBuffer(routeCoords, bufferMeters);
+	let c3=0,c2=0,c1=0;
+	for(const p of pts){ if(p.alert_level===3)c3++; else if(p.alert_level===2)c2++; else c1++; }
+	const risco_total=(c3*WEIGHT_3)+(c2*WEIGHT_2)+(c1*WEIGHT_1);
+	const km=Math.max(1,routeLengthKm(routeCoords));
+	const dens=risco_total/km;
+	const nota=Number((10/(1+Math.exp(DENSITY_STEEPNESS*(dens-DENSITY_MIDPOINT))))).toFixed(1);
+	return { risco_total, nota:Number(nota), densidade:Number(dens.toFixed(3)), km:Number(km.toFixed(1)), c3, c2, c1, points:pts };
+}
 
-		accidents = (gj.features||[])
-			.filter(f => f.geometry?.type === 'Point')
-			.map(f => {
-				const [lng, lat] = f.geometry.coordinates;
-				const pr = f.properties || {};
-				const alert_level = Number(pr.alert_level) || 1;
-				const color = alert_level===3 ? '#ef4444' : alert_level===2 ? '#f59e0b' : '#10b981';
-				const p = { lat, lng, alert_level, alert_label: pr.alert_label, color, props: pr };
-				p.popupHTML = makePopupHTML(p);
-				return p;
+/* ======= DESENHO ======= */
+function drawAttentionPoints(points){
+	accLayer.clearLayers();
+	points.forEach(p=>{
+		L.circleMarker([p.lat,p.lng],{
+			radius: p.alert_level===3?14:p.alert_level===2?11:9,
+			color:"#fff", weight:2.5, fillColor:p.color, fillOpacity:1
+		}).bindPopup(p.popupHTML,{maxWidth:380}).addTo(accLayer);
+	});
+}
+function drawRoutesScored(results,best){
+	routesLayer.clearLayers();
+	results.forEach(r=>{
+		const isBest=(r===best);
+		L.polyline(r.route.coordinates,{
+			color:isBest?'#3FB950':'#58A6FF', weight:isBest?6:4, opacity:isBest?.95:.4
+		}).addTo(routesLayer);
+	});
+	map.fitBounds(L.polyline(best.route.coordinates).getBounds(),{padding:[24,24]});
+}
+function updateStats(results){
+	const routesInfo=document.getElementById('routesInfo');
+	const bestScore=document.getElementById('bestScore');
+	const scoreBreak=document.getElementById('scoreBreakdown');
+	routesInfo.innerHTML=results.map((r,i)=>
+		`<strong>Rota ${i+1}:</strong><br>`+
+		`<span class="info-badge">📊 ${r.nota}/10</span>`+
+		`<span class="info-badge">🎯 ${r.densidade}/km</span>`+
+		`<span class="info-badge">⚠️ ${r.risco_total}</span>`+
+		`<span class="info-badge">📏 ${r.km} km</span>`+
+		`<span class="info-badge">🔴 ${r.c3} · 🟡 ${r.c2} · 🟢 ${r.c1}</span>`
+	).join('<br><br>');
+	const best=results.reduce((a,b)=> a.nota>=b.nota?a:b);
+	bestScore.textContent=best.nota+"/10";
+	const buf=document.getElementById('buffer').value;
+	scoreBreak.innerHTML=`✅ <strong>Melhor rota</strong><br>📊 Densidade: <strong>${best.densidade}/km</strong> · ⚠️ Risco: <strong>${best.risco_total}</strong><br>📏 Distância: <strong>${best.km} km</strong> · 🎯 Buffer: <strong>${buf} m</strong>`;
+}
+
+/* =============== ROTEAMENTO =============== */
+let control;
+const accidentsReady=loadAccidents().catch(err=>{ console.error(err); alert('Erro ao carregar o GeoJSON. Veja o console.'); });
+
+function parseLatLng(str){ const [la,ln]=String(str).split(','); return [Number(la),Number(ln)]; }
+
+async function traceRoute(origin, destination){
+	await accidentsReady;
+	if(control) map.removeControl(control);
+	const btn=document.getElementById('go'); btn.textContent='⏳ Calculando rota...'; btn.classList.add('loading'); btn.disabled=true;
+
+	control=L.Routing.control({
+		waypoints:[L.latLng(origin[0],origin[1]), L.latLng(destination[0],destination[1])],
+		router:L.Routing.osrmv1({ serviceUrl:OSRM_SELFHOST_URL, profile:'driving', timeout:12000 }),
+		show:false, addWaypoints:false, routeWhileDragging:false, showAlternatives:true,
+		altLineOptions:{ styles:[{color:'#58A6FF',weight:4,opacity:.4,dashArray:'6 8'}] },
+		lineOptions:{ styles:[{color:'#3FB950',weight:6,opacity:.95}] }
+	})
+	.on('routesfound',(e)=>{
+		try{
+			const buffer=parseInt(document.getElementById('buffer').value,10)||500;
+			const routes=(e.routes||[]).filter(r=>Array.isArray(r.coordinates)&&r.coordinates.length);
+			if(!routes.length) throw new Error('Nenhuma rota encontrada.');
+			const results=routes.map(r=>{
+				const coords=r.coordinates.map(c=>({lat:c.lat,lng:c.lng}));
+				const s=scoreRoute(coords, buffer);
+				return { route:r, ...s };
 			});
-
-		// índice espacial simples (grid 0.1 grau)
-		accidents.forEach(p=>{
-			const cell = `${Math.floor(p.lat*10)}_${Math.floor(p.lng*10)}`;
-			if(!accIndex.has(cell)) accIndex.set(cell, []);
-			accIndex.get(cell).push(p);
-		});
-	}
-
-	// ========== GEO HELPERS ==========
-	function haversine(a,b){
-		const R=6371000,toRad=x=>x*Math.PI/180;
-		const dLat=toRad(b.lat-a.lat), dLon=toRad(b.lng-a.lng);
-		const lat1=toRad(a.lat), lat2=toRad(b.lat);
-		const h=Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
-		return 2*R*Math.asin(Math.sqrt(h));
-	}
-	function samplePolyline(latlngs, everyMeters=400){
-		const out=[]; let acc=0;
-		for(let i=1;i<latlngs.length;i++){
-			const a=latlngs[i-1], b=latlngs[i];
-			const d=haversine(a,b); acc+=d;
-			if(acc>=everyMeters){ out.push({lat:b.lat,lng:b.lng}); acc=0; }
-		}
-		if(!out.length && latlngs.length){
-			const last = latlngs[latlngs.length-1];
-			out.push({lat:last.lat,lng:last.lng});
-		}
-		return out;
-	}
-	function nearbyPoints(lat,lng){
-		const cLat=Math.floor(lat*10), cLng=Math.floor(lng*10);
-		const pts=[];
-		for(let i=cLat-2;i<=cLat+2;i++){
-			for(let j=cLng-2;j<=cLng+2;j++){
-				const cell=`${i}_${j}`;
-				if(accIndex.has(cell)) pts.push(...accIndex.get(cell));
-			}
-		}
-		return pts;
-	}
-	function filterByBuffer(routeCoords, bufferMeters){
-		const sampled = samplePolyline(routeCoords, Math.min(800, bufferMeters));
-		const picked = new Set(), res=[];
-		for(const s of sampled){
-			for(const p of nearbyPoints(s.lat,s.lng)){
-				if(haversine(s,p) <= bufferMeters){
-					const key=`${p.lat.toFixed(5)}_${p.lng.toFixed(5)}`;
-					if(!picked.has(key)){ picked.add(key); res.push(p); }
-				}
-			}
-		}
-		return res;
-	}
-
-	// ======= SCORE/SELEÇÃO =======
-	function scoreRoute(routeCoords, bufferMeters){
-		const pts = filterByBuffer(routeCoords, bufferMeters);
-
-		let c3=0,c2=0,c1=0;
-		for(const p of pts){
-			if(p.alert_level===3) c3++;
-			else if(p.alert_level===2) c2++;
-			else c1++;
-		}
-
-		// Soma ponderada (pode zerar o baixo risco se quiser: troque WEIGHT_1 por 0)
-		const risco_total = (c3*WEIGHT_3) + (c2*WEIGHT_2) + (c1*WEIGHT_1);
-
-		// Exposição: tamanho real da rota em km (com piso pra evitar rota ~0 km explodir densidade)
-		const km = Math.max(1, routeLengthKm(routeCoords)); // piso em 1 km
-
-		// Densidade de risco (quanto risco por km)
-		const dens = risco_total / km;
-
-		// Conversão suave para 0–10 (logística): quanto maior a densidade, menor a nota
-		// nota = 10 / (1 + e^(k*(dens - m)))
-		const nota = Number((10 / (1 + Math.exp(DENSITY_STEEPNESS * (dens - DENSITY_MIDPOINT)))).toFixed(1));
-
-		return { risco_total, nota, densidade: Number(dens.toFixed(3)), km: Number(km.toFixed(1)), c3, c2, c1, points: pts };
-	}
-
-
-
-	// ========= DESENHO =========
-	function drawAttentionPoints(points){
-		accLayer.clearLayers();
-		points.forEach(p=>{
-			const m = L.circleMarker([p.lat,p.lng],{
-				radius: p.alert_level===3 ? 14 : p.alert_level===2 ? 11 : 9,
-				color: "#fff", weight: 2.5,
-				fillColor: p.color, fillOpacity: 1
-			}).bindPopup(p.popupHTML, {maxWidth:380});
-			m.addTo(accLayer);
-		});
-	}
-	function drawRoutesScored(results,best){
-		routesLayer.clearLayers();
-		results.forEach(r=>{
-			const isBest = r===best;
-			L.polyline(r.route.coordinates, {
-				color: isBest ? '#10b981' : '#3b82f6',
-				weight: isBest ? 6 : 4,
-				opacity: isBest ? .95 : .4
-			}).addTo(routesLayer);
-		});
-		map.fitBounds(L.polyline(best.route.coordinates).getBounds(), { padding:[30,30] });
-	}
-	function updateStats(results){
-		const routesInfo = document.getElementById('routesInfo');
-		const bestScore = document.getElementById('bestScore');
-		const scoreBreak = document.getElementById('scoreBreakdown');
-
-		routesInfo.innerHTML = results.map((r,i)=>
-			`Rota ${i+1}: ` +
-			`<span class="pill">nota ${r.nota}/10</span> ` +
-			`<span class="pill">dens ${r.densidade}/km</span> ` +
-			`<span class="pill">risco ${r.risco_total}</span> ` +
-			`<span class="pill">dist ${r.km} km</span> ` +
-			`<span class="pill">3:${r.c3} · 2:${r.c2} · 1:${r.c1}</span>`
-		).join('<br>');
-
-		const best = results.reduce((a,b)=> a.nota>=b.nota ? a : b); // agora escolhe pela MAIOR nota
-		bestScore.textContent = best.nota + "/10";
-		const buf = document.getElementById('buffer').value;
-		scoreBreak.innerHTML = `Melhor rota · densidade: <b>${best.densidade}/km</b> · risco: <b>${best.risco_total}</b> · distância: <b>${best.km} km</b> · Buffer: <b>${buf} m</b>`;
-	}
-
-
-	// Calibração da nota 0–10 por densidade (risco_total por km)
-	const DENSITY_MIDPOINT = 0.30; // densidade (~0.30) dá ~5/10
-	const DENSITY_STEEPNESS = 4.0; // agressividade da curva (3–6 é bom)
-
-	function routeLengthKm(coords){
-		if(!Array.isArray(coords) || coords.length < 2) return 0;
-		let total = 0;
-		for(let i=1;i<coords.length;i++){
-			total += haversine(coords[i-1], coords[i]); // metros
-		}
-		return total / 1000; // km
-		}
-
-
-
-
-
-	// =============== ROTEAMENTO ===============
-	let control;
-	function traceRoute(origin, destination){
-		if(control) map.removeControl(control);
-		const btn = document.getElementById('go');
-		btn.textContent = 'Calculando rota...'; btn.classList.add('loading'); btn.disabled = true;
-
-		control = L.Routing.control({
-			waypoints: [ L.latLng(origin[0],origin[1]), L.latLng(destination[0],destination[1]) ],
-			router: L.Routing.osrmv1({ serviceUrl: OSRM_SELFHOST_URL, profile: 'driving', timeout: 12000 }),
-			show: false, addWaypoints: false, routeWhileDragging: false,
-			showAlternatives: true,
-			altLineOptions: { styles: [{ color:'#3b82f6', weight:4, opacity:.4, dashArray:'6 8'}] },
-			lineOptions: { styles: [{ color:'#10b981', weight:6, opacity:.95 }] }
-		})
-		.on('routesfound', (e)=>{
-			const buffer = parseInt(document.getElementById('buffer').value,10) || 500;
-			const routes = (e.routes || []).filter(r => Array.isArray(r.coordinates) && r.coordinates.length);
-
-			if(!routes.length){
-				alert('Nenhuma rota encontrada.');
-				btn.textContent='Traçar rota segura';
-				btn.classList.remove('loading');
-				btn.disabled=false;
-				return;
-			}
-
-			const results = routes.map(r=>{
-				try {
-					const coords = r.coordinates.map(c=>({lat:c.lat, lng:c.lng}));
-					const s = scoreRoute(coords, buffer);
-					return { route: r, ...s };
-				} catch(err) {
-					console.error("Erro ao processar rota:", err, r);
-					return null;
-				}
-			}).filter(Boolean);
-
-			if(!results.length){
-				alert('Falha ao processar rotas retornadas.');
-				btn.textContent='Traçar rota segura';
-				btn.classList.remove('loading');
-				btn.disabled=false;
-				return;
-			}
-
-			const best = results.reduce((a,b)=> a.risco_total<=b.risco_total ? a : b);
-
-			drawRoutesScored(results, best);
+			const best=results.reduce((a,b)=> a.nota>=b.nota?a:b);
+			drawRoutesScored(results,best);
 			drawAttentionPoints(best.points);
 			updateStats(results);
+		}catch(err){
+			console.error(err); alert('Falha ao processar as rotas.');
+		}finally{
+			btn.textContent='🚀 Traçar Rota'; btn.classList.remove('loading'); btn.disabled=false;
+		}
+	})
+	.on('routingerror',(e)=>{
+		console.error('Routing error',e);
+		alert('Erro no roteamento (OSRM). Verifique o serviço.');
+		btn.textContent='🚀 Traçar Rota'; btn.classList.remove('loading'); btn.disabled=false;
+	})
+	.addTo(map);
+}
 
-			btn.textContent = 'Traçar rota segura';
-			btn.classList.remove('loading');
-			btn.disabled = false;
-		})
-
-
-		.on('routingerror', ()=>{
-			alert('Erro ao calcular a rota. Verifique o OSRM e tente novamente.');
-			btn.textContent = 'Traçar rota segura'; btn.classList.remove('loading'); btn.disabled = false;
-		})
-		.addTo(map);
-	}
-
-	// =============== UI =======================
-	document.getElementById('go').addEventListener('click', ()=>{
-		const o = document.getElementById('origin').value.split(',').map(parseFloat);
-		const d = document.getElementById('destination').value.split(',').map(parseFloat);
-		if(o.length<2||d.length<2||Number.isNaN(o[0])||Number.isNaN(d[0])){ alert('Selecione origem e destino válidos.'); return; }
-		traceRoute([o[0],o[1]], [d[0],d[1]]);
-	});
-
-	// Boot: carrega acidentes
-	(async function main(){ await loadAccidents(); })();
-	</script>
+/* ============== UI ============== */
+document.getElementById('go').addEventListener('click',()=>{
+	const o=parseLatLng(document.getElementById('origin').value);
+	const d=parseLatLng(document.getElementById('destination').value);
+	if (o[0]===d[0] && o[1]===d[1]) return alert('Origem e destino iguais não rola 😅');
+	traceRoute(o,d);
+});
+</script>
 </body>
 </html>
