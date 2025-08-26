@@ -13,8 +13,9 @@ Front em **Leaflet**, roteamento com **OSRM**. Clone, rode e use — sem novela.
 - **Git**
 - **Docker + Docker Compose**
 - **Servidor HTTP simples** (um destes):
-  - `php -S 0.0.0.0:8000 -t public`
-  - `python -m http.server 8000 -d public`
+  
+  - `php -S 0.0.0.0:8000`
+  - `python -m http.server 8000`
 
 > Abrir via `file://` quebra as chamadas. Sirva via HTTP.
 
@@ -147,7 +148,7 @@ O algoritmo penaliza trechos com maior risco (3 > 2 > 1). Em empate, leva a rota
 
 ## 🧯 Problemas comuns
 
-```bash
+```
 Mapa não carrega → sirva via HTTP (PHP/Python), não file://.
 
 Porta 5000 ocupada → troque a porta no docker-compose.yml.
