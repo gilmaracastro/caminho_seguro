@@ -1,0 +1,467 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -44.601,
+          -22.489
+        ]
+      },
+      "properties": {
+        "Mode*(Classificacao_Risco_Pontos)": 3,
+        "tracado_via": "BR-116 (Via Dutra) - Itatiaia/RJ",
+        "Trecho_Completo": "BR-116: Itatiaia/RJ → Resende/RJ",
+        "condicao_metereologica": "Céu limpo",
+        "tipo_pista": "Dupla",
+        "dia_semana": "sexta-feira",
+        "horario": "18:30",
+        "Soma de mortos": 0,
+        "Soma de feridos_graves": 1,
+        "Soma de feridos_leves": 3
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -44.446,
+          -22.468
+        ]
+      },
+      "properties": {
+        "Mode*(Classificacao_Risco_Pontos)": 2,
+        "tracado_via": "BR-116 (Via Dutra) - Resende/RJ",
+        "Trecho_Completo": "BR-116: Resende/RJ → Queluz/SP",
+        "condicao_metereologica": "Chuva leve",
+        "tipo_pista": "Dupla",
+        "dia_semana": "sábado",
+        "horario": "14:10",
+        "Soma de mortos": 0,
+        "Soma de feridos_graves": 0,
+        "Soma de feridos_leves": 2
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -46.62,
+          -23.51
+        ]
+      },
+      "properties": {
+        "Mode*(Classificacao_Risco_Pontos)": 2,
+        "tracado_via": "BR-116 (Marginal) - São Paulo/SP",
+        "Trecho_Completo": "BR-116: Guarulhos/SP → Marginal/SP",
+        "condicao_metereologica": "Nublado",
+        "tipo_pista": "Múltiplas faixas",
+        "dia_semana": "quinta-feira",
+        "horario": "08:15",
+        "Soma de mortos": 0,
+        "Soma de feridos_graves": 0,
+        "Soma de feridos_leves": 4
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -46.5337,
+          -23.4543
+        ]
+      },
+      "properties": {
+        "Mode*(Classificacao_Risco_Pontos)": 3,
+        "tracado_via": "BR-116 - Guarulhos/SP",
+        "Trecho_Completo": "BR-116: Guarulhos/SP → SP-070",
+        "condicao_metereologica": "Chuva moderada",
+        "tipo_pista": "Dupla",
+        "dia_semana": "terça-feira",
+        "horario": "19:45",
+        "Soma de mortos": 1,
+        "Soma de feridos_graves": 2,
+        "Soma de feridos_leves": 5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -43.189,
+          -22.514
+        ]
+      },
+      "properties": {
+        "Mode*(Classificacao_Risco_Pontos)": 2,
+        "tracado_via": "BR-040 - Petrópolis/RJ",
+        "Trecho_Completo": "BR-040: Petrópolis/RJ → Itaipava/RJ",
+        "condicao_metereologica": "Neblina",
+        "tipo_pista": "Dupla",
+        "dia_semana": "domingo",
+        "horario": "06:40",
+        "Soma de mortos": 0,
+        "Soma de feridos_graves": 1,
+        "Soma de feridos_leves": 1
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -43.3503,
+          -21.7642
+        ]
+      },
+      "properties": {
+        "Mode*(Classificacao_Risco_Pontos)": 3,
+        "tracado_via": "BR-040 - Juiz de Fora/MG",
+        "Trecho_Completo": "BR-040: Matias Barbosa/MG → Juiz de Fora/MG",
+        "condicao_metereologica": "Céu limpo",
+        "tipo_pista": "Dupla",
+        "dia_semana": "segunda-feira",
+        "horario": "17:20",
+        "Soma de mortos": 1,
+        "Soma de feridos_graves": 0,
+        "Soma de feridos_leves": 2
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -44.2,
+          -19.97
+        ]
+      },
+      "properties": {
+        "Mode*(Classificacao_Risco_Pontos)": 2,
+        "tracado_via": "BR-381 (Fernão Dias) - Betim/MG",
+        "Trecho_Completo": "BR-381: Betim/MG → Contagem/MG",
+        "condicao_metereologica": "Nublado",
+        "tipo_pista": "Dupla",
+        "dia_semana": "quarta-feira",
+        "horario": "07:55",
+        "Soma de mortos": 0,
+        "Soma de feridos_graves": 0,
+        "Soma de feridos_leves": 3
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -43.17,
+          -19.81
+        ]
+      },
+      "properties": {
+        "Mode*(Classificacao_Risco_Pontos)": 3,
+        "tracado_via": "BR-381 - João Monlevade/MG",
+        "Trecho_Completo": "BR-381: João Monlevade/MG → Nova Era/MG",
+        "condicao_metereologica": "Chuva leve",
+        "tipo_pista": "Simples",
+        "dia_semana": "sexta-feira",
+        "horario": "21:10",
+        "Soma de mortos": 0,
+        "Soma de feridos_graves": 1,
+        "Soma de feridos_leves": 2
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -42.033,
+          -20.262
+        ]
+      },
+      "properties": {
+        "Mode*(Classificacao_Risco_Pontos)": 2,
+        "tracado_via": "BR-262 - Manhuaçu/MG",
+        "Trecho_Completo": "BR-262: Manhuaçu/MG → Realeza/ES",
+        "condicao_metereologica": "Céu limpo",
+        "tipo_pista": "Simples",
+        "dia_semana": "sábado",
+        "horario": "10:25",
+        "Soma de mortos": 0,
+        "Soma de feridos_graves": 0,
+        "Soma de feridos_leves": 1
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -40.5,
+          -20.39
+        ]
+      },
+      "properties": {
+        "Mode*(Classificacao_Risco_Pontos)": 3,
+        "tracado_via": "BR-262 - Viana/ES",
+        "Trecho_Completo": "BR-262: Viana/ES → Cariacica/ES",
+        "condicao_metereologica": "Chuva moderada",
+        "tipo_pista": "Dupla",
+        "dia_semana": "terça-feira",
+        "horario": "18:05",
+        "Soma de mortos": 1,
+        "Soma de feridos_graves": 2,
+        "Soma de feridos_leves": 3
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.0626,
+          -22.9099
+        ]
+      },
+      "properties": {
+        "Mode*(Classificacao_Risco_Pontos)": 2,
+        "tracado_via": "SP-330 (Anhanguera) - Campinas/SP",
+        "Trecho_Completo": "SP-330: Valinhos/SP → Campinas/SP",
+        "condicao_metereologica": "Céu limpo",
+        "tipo_pista": "Múltiplas faixas",
+        "dia_semana": "segunda-feira",
+        "horario": "09:35",
+        "Soma de mortos": 0,
+        "Soma de feridos_graves": 0,
+        "Soma de feridos_leves": 2
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.0,
+          -22.84
+        ]
+      },
+      "properties": {
+        "Mode*(Classificacao_Risco_Pontos)": 1,
+        "tracado_via": "SP-348 (Bandeirantes) - Região de Campinas/SP",
+        "Trecho_Completo": "SP-348: Itupeva/SP → Campinas/SP",
+        "condicao_metereologica": "Céu limpo",
+        "tipo_pista": "Múltiplas faixas",
+        "dia_semana": "quarta-feira",
+        "horario": "16:10",
+        "Soma de mortos": 0,
+        "Soma de feridos_graves": 0,
+        "Soma de feridos_leves": 1
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.93,
+          -19.74
+        ]
+      },
+      "properties": {
+        "Mode*(Classificacao_Risco_Pontos)": 2,
+        "tracado_via": "BR-050 - Uberaba/MG",
+        "Trecho_Completo": "BR-050: Conceição das Alagoas/MG → Uberaba/MG",
+        "condicao_metereologica": "Nublado",
+        "tipo_pista": "Dupla",
+        "dia_semana": "domingo",
+        "horario": "11:55",
+        "Soma de mortos": 0,
+        "Soma de feridos_graves": 0,
+        "Soma de feridos_leves": 2
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.2772,
+          -18.9186
+        ]
+      },
+      "properties": {
+        "Mode*(Classificacao_Risco_Pontos)": 3,
+        "tracado_via": "BR-050 - Uberlândia/MG",
+        "Trecho_Completo": "BR-050: Uberaba/MG → Uberlândia/MG",
+        "condicao_metereologica": "Céu limpo",
+        "tipo_pista": "Dupla",
+        "dia_semana": "sexta-feira",
+        "horario": "20:05",
+        "Soma de mortos": 1,
+        "Soma de feridos_graves": 1,
+        "Soma de feridos_leves": 4
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -43.1729,
+          -22.9068
+        ]
+      },
+      "properties": {
+        "Mode*(Classificacao_Risco_Pontos)": 2,
+        "tracado_via": "Acesso urbano - Rio de Janeiro/RJ",
+        "Trecho_Completo": "RJ: Centro → Zona Norte",
+        "condicao_metereologica": "Chuva leve",
+        "tipo_pista": "Múltiplas faixas",
+        "dia_semana": "quinta-feira",
+        "horario": "18:40",
+        "Soma de mortos": 0,
+        "Soma de feridos_graves": 0,
+        "Soma de feridos_leves": 5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -43.1034,
+          -22.8832
+        ]
+      },
+      "properties": {
+        "Mode*(Classificacao_Risco_Pontos)": 2,
+        "tracado_via": "Ponte/BR-101 - Niterói/RJ",
+        "Trecho_Completo": "BR-101: Niterói/RJ → São Gonçalo/RJ",
+        "condicao_metereologica": "Neblina",
+        "tipo_pista": "Dupla",
+        "dia_semana": "terça-feira",
+        "horario": "07:20",
+        "Soma de mortos": 0,
+        "Soma de feridos_graves": 0,
+        "Soma de feridos_leves": 3
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -40.3378,
+          -20.3197
+        ]
+      },
+      "properties": {
+        "Mode*(Classificacao_Risco_Pontos)": 1,
+        "tracado_via": "Acesso urbano - Vitória/ES",
+        "Trecho_Completo": "ES-080/ES-262: Cariacica/ES → Vitória/ES",
+        "condicao_metereologica": "Céu limpo",
+        "tipo_pista": "Múltiplas faixas",
+        "dia_semana": "quarta-feira",
+        "horario": "15:10",
+        "Soma de mortos": 0,
+        "Soma de feridos_graves": 0,
+        "Soma de feridos_leves": 0
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -40.3074,
+          -20.1211
+        ]
+      },
+      "properties": {
+        "Mode*(Classificacao_Risco_Pontos)": 2,
+        "tracado_via": "Acesso urbano - Serra/ES",
+        "Trecho_Completo": "ES-010: Serra/ES → Vitória/ES",
+        "condicao_metereologica": "Chuva leve",
+        "tipo_pista": "Dupla",
+        "dia_semana": "segunda-feira",
+        "horario": "08:05",
+        "Soma de mortos": 0,
+        "Soma de feridos_graves": 0,
+        "Soma de feridos_leves": 1
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -43.9345,
+          -19.9167
+        ]
+      },
+      "properties": {
+        "Mode*(Classificacao_Risco_Pontos)": 2,
+        "tracado_via": "Acesso urbano - Belo Horizonte/MG",
+        "Trecho_Completo": "Anel Rodoviário BH/MG",
+        "condicao_metereologica": "Nublado",
+        "tipo_pista": "Múltiplas faixas",
+        "dia_semana": "sexta-feira",
+        "horario": "17:50",
+        "Soma de mortos": 0,
+        "Soma de feridos_graves": 1,
+        "Soma de feridos_leves": 3
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -46.6333,
+          -23.5505
+        ]
+      },
+      "properties": {
+        "Mode*(Classificacao_Risco_Pontos)": 3,
+        "tracado_via": "Marginais - São Paulo/SP",
+        "Trecho_Completo": "Marginal Tietê/Pinheiros",
+        "condicao_metereologica": "Chuva moderada",
+        "tipo_pista": "Múltiplas faixas",
+        "dia_semana": "segunda-feira",
+        "horario": "19:20",
+        "Soma de mortos": 1,
+        "Soma de feridos_graves": 1,
+        "Soma de feridos_leves": 6
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -46.73,
+          -23.43
+        ]
+      },
+      "properties": {
+        "Mode*(Classificacao_Risco_Pontos)": 1,
+        "tracado_via": "SP-070 - Jacareí/SP",
+        "Trecho_Completo": "SP-070: Jacareí/SP → São José dos Campos/SP",
+        "condicao_metereologica": "Céu limpo",
+        "tipo_pista": "Dupla",
+        "dia_semana": "domingo",
+        "horario": "10:15",
+        "Soma de mortos": 0,
+        "Soma de feridos_graves": 0,
+        "Soma de feridos_leves": 0
+      }
+    }
+  ]
+}
