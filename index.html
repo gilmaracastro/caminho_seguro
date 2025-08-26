@@ -88,7 +88,7 @@
 					<div id="routesInfo" class="small">—</div>
 				</div>
 				<div class="card">
-					<div style="color:var(--muted);font-size:12px">Pontuação (menor = mais segura)</div>
+					<div style="color:var(--muted);font-size:12px">Pontuação (maior = mais segura)</div>
 					<div id="bestScore" class="score">—</div>
 					<div id="scoreBreakdown" style="color:var(--muted);font-size:12px"></div>
 				</div>
@@ -231,10 +231,20 @@
 			else c1++;
 		}
 
-		const risco_total = (c3*5) + (c2*2) + (c1*1);
-		const nota = Math.max(0, (10 - (risco_total/10)).toFixed(1)); // escala 0–10
+		// Soma ponderada (pode zerar o baixo risco se quiser: troque WEIGHT_1 por 0)
+		const risco_total = (c3*WEIGHT_3) + (c2*WEIGHT_2) + (c1*WEIGHT_1);
 
-		return { risco_total, nota, c3, c2, c1, points: pts };
+		// Exposição: tamanho real da rota em km (com piso pra evitar rota ~0 km explodir densidade)
+		const km = Math.max(1, routeLengthKm(routeCoords)); // piso em 1 km
+
+		// Densidade de risco (quanto risco por km)
+		const dens = risco_total / km;
+
+		// Conversão suave para 0–10 (logística): quanto maior a densidade, menor a nota
+		// nota = 10 / (1 + e^(k*(dens - m)))
+		const nota = Number((10 / (1 + Math.exp(DENSITY_STEEPNESS * (dens - DENSITY_MIDPOINT)))).toFixed(1));
+
+		return { risco_total, nota, densidade: Number(dens.toFixed(3)), km: Number(km.toFixed(1)), c3, c2, c1, points: pts };
 	}
 
 
@@ -269,18 +279,34 @@
 		const scoreBreak = document.getElementById('scoreBreakdown');
 
 		routesInfo.innerHTML = results.map((r,i)=>
-			`Rota ${i+1}: <span class="pill">risco total ${r.risco_total}</span> `+
-			`<span class="pill">nota ${r.nota}/10</span> `+
-			`<span class="pill">3: ${r.c3}</span> `+
-			`<span class="pill">2: ${r.c2}</span> `+
-			`<span class="pill">1: ${r.c1}</span>`
+			`Rota ${i+1}: ` +
+			`<span class="pill">nota ${r.nota}/10</span> ` +
+			`<span class="pill">dens ${r.densidade}/km</span> ` +
+			`<span class="pill">risco ${r.risco_total}</span> ` +
+			`<span class="pill">dist ${r.km} km</span> ` +
+			`<span class="pill">3:${r.c3} · 2:${r.c2} · 1:${r.c1}</span>`
 		).join('<br>');
 
-		const best = results.reduce((a,b)=> a.risco_total<=b.risco_total ? a : b);
+		const best = results.reduce((a,b)=> a.nota>=b.nota ? a : b); // agora escolhe pela MAIOR nota
 		bestScore.textContent = best.nota + "/10";
 		const buf = document.getElementById('buffer').value;
-		scoreBreak.innerHTML = `3: <b>${best.c3}</b> · 2: <b>${best.c2}</b> · 1: <b>${best.c1}</b> · Buffer: <b>${buf} m</b>`;
+		scoreBreak.innerHTML = `Melhor rota · densidade: <b>${best.densidade}/km</b> · risco: <b>${best.risco_total}</b> · distância: <b>${best.km} km</b> · Buffer: <b>${buf} m</b>`;
 	}
+
+
+	// Calibração da nota 0–10 por densidade (risco_total por km)
+	const DENSITY_MIDPOINT = 0.30; // densidade (~0.30) dá ~5/10
+	const DENSITY_STEEPNESS = 4.0; // agressividade da curva (3–6 é bom)
+
+	function routeLengthKm(coords){
+		if(!Array.isArray(coords) || coords.length < 2) return 0;
+		let total = 0;
+		for(let i=1;i<coords.length;i++){
+			total += haversine(coords[i-1], coords[i]); // metros
+		}
+		return total / 1000; // km
+		}
+
 
 
 
