@@ -1,5 +1,4 @@
-<img width="1918" height="936" alt="image" src="https://github.com/user-attachments/assets/6388619d-78ca-4358-a9a6-cffcf47b9c84" />
-
+<img width="1918" height="936" alt="image" src="https://github.com/user-attachments/assets/ba34d3c6-b4ea-4600-883d-8c1513a6ea93" />
 
 # Caminhos Seguros — Sudeste (Leaflet + OSRM)
 
